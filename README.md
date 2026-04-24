@@ -115,8 +115,8 @@ Open the notebook directly in Colab:
 
 ## 👤 Author
 
-**Your Name**  
-[GitHub](https://github.com/YOUR_USERNAME) · [LinkedIn](https://linkedin.com/in/YOUR_PROFILE)
+**Amit Kumar Mishra**  
+[GitHub](https://github.com/MishraAmit20) 
 
 ---
 
