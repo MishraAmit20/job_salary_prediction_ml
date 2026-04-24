@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Salary Predictor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: white; border-radius: 16px; padding: 40px; width: 560px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #1a1a2e; font-size: 1.8rem; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 32px; font-size: 0.95rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.82rem; font-weight: 600; color: #444; text-transform: uppercase; letter-spacing: 0.5px; }
+    select, input { padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; color: #333; background: #fafafa; transition: border 0.2s; }
+    select:focus, input:focus { outline: none; border-color: #4f46e5; background: white; }
+    button { width: 100%; padding: 14px; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 24px; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    .result { margin-top: 24px; text-align: center; padding: 20px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; border: 2px solid #86efac; display: none; }
+    .result .label { color: #166534; font-weight: 600; font-size: 0.9rem; }
+    .result .salary { color: #15803d; font-size: 2.5rem; font-weight: 800; margin-top: 4px; }
+    .error { background: #fef2f2; border-color: #fca5a5; }
+    .error .label { color: #991b1b; }
+    .error .salary { font-size: 1rem; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>💼 Salary Predictor</h1>
+    <p class="subtitle">Predict your expected annual salary using ML</p>
+
+    <div class="grid">
+      <div class="form-group">
+        <label>Job Title</label>
+        <select id="job_title">
+          {% for opt in options.job_title %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Education Level</label>
+        <select id="education_level">
+          {% for opt in options.education_level %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Experience (Years)</label>
+        <input type="number" id="experience_years" min="0" max="40" value="5" />
+      </div>
+      <div class="form-group">
+        <label>Skills Count</label>
+        <input type="number" id="skills_count" min="1" max="30" value="8" />
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <select id="industry">
+          {% for opt in options.industry %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Company Size</label>
+        <select id="company_size">
+          {% for opt in options.company_size %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="location">
+          {% for opt in options.location %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Remote Work</label>
+        <select id="remote_work">
+          {% for opt in options.remote_work %}<option>{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Certifications</label>
+        <input type="number" id="certifications" min="0" max="10" value="1" />
+      </div>
+    </div>
+
+    <button onclick="predict()">🔮 Predict Salary</button>
+
+    <div class="result" id="result">
+      <div class="label" id="result-label">Predicted Annual Salary</div>
+      <div class="salary" id="result-value"></div>
+    </div>
+  </div>
+
+  <script>
+    async function predict() {
+      const fields = ["job_title","education_level","industry","company_size","location","remote_work"];
+      const nums   = ["experience_years","skills_count","certifications"];
+      const data = {};
+      fields.forEach(f => data[f] = document.getElementById(f).value);
+      nums.forEach(f => data[f] = document.getElementById(f).value);
+
+      const res  = await fetch("/predict", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(data) });
+      const json = await res.json();
+      const box  = document.getElementById("result");
+      box.style.display = "block";
+      box.classList.remove("error");
+
+      if (json.salary) {
+        document.getElementById("result-label").textContent = "Predicted Annual Salary";
+        document.getElementById("result-value").textContent = json.salary;
+      } else {
+        box.classList.add("error");
+        document.getElementById("result-label").textContent = "Error";
+        document.getElementById("result-value").textContent = json.error;
+      }
+    }
+  </script>
+</body>
+</html>
